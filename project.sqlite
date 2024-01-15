@@ -1,0 +1,128 @@
+--  Quiz Funnel - No. 1
+-- SELECT *
+-- FROM survey
+-- LIMIT 10;
+-- Columns include user_id, number_of_pairs, and address
+
+--  Quiz Funnel - No. 2
+-- SELECT question,
+--    COUNT(DISTINCT user_id)
+-- FROM survey
+-- GROUP BY 1;
+-- Question 1 received 500, question 2 received 475, question 3 received 380, question 4 received 361, and question 5 received 270.
+
+--  Quiz Funnel - No. 3
+-- Q1 - 100%
+-- Q2 - 95.00%
+-- Q3 - 76.00%
+-- Q4 - 72.20%
+-- Q5 - 54.00% - Many people did not want to answer this personal question about their last eye exam.
+
+-- Home Try-On Funnel - No. 4
+-- SELECT *
+-- FROM quiz
+-- LIMIT 5;
+-- Columns include user_id, style, fit, shape, and color
+-- SELECT *
+-- FROM home_try_on
+-- LIMIT 5;
+-- Columns include user_id, number_of_pairs, and address
+-- SELECT *
+-- FROM purchase
+-- LIMIT 5;
+-- Columns include user_id, product_id, style, model_name, color, and price
+
+-- Create New Table - No. 5
+-- SELECT DISTINCT q.user_id,
+--    h.user_id IS NOT NULL AS 'is_home_try_on',
+--    h.number_of_pairs,
+--    p.user_id IS NOT NULL AS 'is_purchase'
+-- FROM quiz q
+-- LEFT JOIN home_try_on h
+--    ON q.user_id = h.user_id
+-- LEFT JOIN purchase p
+--    ON p.user_id = q.user_id
+-- LIMIT 10;
+
+-- Analyze Data, No. 6
+-- Calculate overall conversion rates by aggregating across all rows
+-- WITH base_table AS (
+--   SELECT DISTINCT q.user_id,
+--   h.user_id IS NOT NULL AS 'is_home_try_on',
+--   h.number_of_pairs AS 'AB_variant',
+--   p.user_id IS NOT NULL AS 'is_purchase'
+--  FROM quiz q
+--  LEFT JOIN home_try_on h
+--   ON q.user_id = h.user_id
+--  LEFT JOIN purchase p
+--   ON p.user_id = q.user_id
+-- )
+-- SELECT AB_variant,
+--  SUM(CASE 
+--      WHEN is_home_try_on = 1
+--      THEN 1
+--      ELSE 0
+--      END) 'home_trial',
+--   SUM(CASE
+--       WHEN is_purchase = 1
+--       THEN 1
+--       ELSE 0
+--       END) 'purchase'
+--   FROM base_table
+--   GROUP BY AB_variant
+--   HAVING home_trial > 0;
+
+--  calculate the difference in purchase rates between customers who had 3 number_of_pairs with ones who had 5
+-- 3 Pairs, home_trial (379), and purchase(201) (53% purchase rate)
+-- 5 pairs, home_trial(371), purchase(294)(79% purchase rate)
+
+-- compare conversion from quiz to home_try_on and home_try_on to purchase
+-- WITH q AS (
+--   SELECT '1_quiz' AS stage, COUNT(DISTINCT user_id) as 'total'
+--   FROM quiz
+-- ),
+-- h AS (
+--   SELECT '2_home_try_on' AS stage, COUNT(DISTINCT user_id) AS 'total'
+--   FROM home_try_on
+-- ),
+-- p AS (
+--   SELECT '3_purchase' AS stage, COUNT(DISTINCT user_id) AS 'total'
+--   FROM purchase
+-- )
+-- SELECT *
+-- FROM q
+-- UNION ALL SELECT *
+-- FROM h
+-- UNION ALL SELECT *
+-- FROM p;
+-- quiz 100% to home_try_on 75%, and purchase 66%
+
+-- most common results of the style quiz
+-- SELECT style, COUNT(DISTINCT user_id) AS 'total'
+-- FROM quiz
+-- GROUP BY 1
+-- ORDER BY 2 DESC;
+-- Most common style response was women's styles
+
+-- SELECT shape, COUNT(DISTINCT user_id) AS 'total'
+-- FROM quiz
+-- GROUP BY 1
+-- ORDER BY 2 DESC;
+-- Most common response to shape was rectangular.
+
+-- SELECT fit, COUNT(DISTINCT user_id) AS 'total'
+-- FROM quiz
+-- GROUP BY 1
+-- ORDER BY 2 DESC
+-- LIMIT 1;
+-- Most common fit was narrow.
+
+-- most common types of purchase made
+-- SELECT style, 
+--  model_name,
+--  color,
+--  COUNT(*) AS 'total'
+-- FROM purchase
+-- GROUP BY 2
+-- ORDER BY total DESC;
+-- Most common types of purchase made were Eugene Narrow in Rosewood Tortise for Women (116 sold), and Dawes in Jet Black for Men (107 sold).
